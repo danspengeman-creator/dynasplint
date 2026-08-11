@@ -205,6 +205,15 @@
     .card { border: none; padding: 0; }
     h1 { font-size: 1.4rem; }
     table { font-size: 0.8rem; }
+    .print-footer { display: block !important; }
+  }
+  .print-footer {
+    display: none;
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-size: 0.78rem;
+    color: #6b6058;
   }
 </style>
 </head>
@@ -282,8 +291,10 @@
   </div>
 </div>
 
+<div class="print-footer">Patient: Dan Spengeman &nbsp;|&nbsp; DOB: 8-4-1982</div>
+
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxbwrkSi8FVMcCsYIQ__hB13l81K2owwDUXAYkKKAds1TjsAYnGqscXhGyjt3RvpA72/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkfryb1yoQ8Vl1tfjiYb4sjODfCnDyEpJSng6-YUNtPXNP0EAyo2n76Dw8NN098rkN/exec';
 
   let currentSplint = 'flexion';
   let entriesCache = { flexion: [], extension: [] };
