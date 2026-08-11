@@ -178,7 +178,7 @@
 <body>
 
 <h1>Dynasplint Tracker</h1>
-<div class="subtitle">Daily wear log for elbow flexion and extension</div>
+<div class="subtitle" id="mainSubtitle">Daily wear log for elbow flexion and extension</div>
 
 <div class="tabs">
   <button class="tab-btn active" id="tabFlexionBtn" onclick="switchTab('flexion')">Flexion</button>
@@ -244,7 +244,7 @@
 </div>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdVmVJ_Dvfs2s8HnN4DM-YzND26eVJcu2R8bG5WbqsHXRD6Wtj18Z03oCGQtsyljRG/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxbwrkSi8FVMcCsYIQ__hB13l81K2owwDUXAYkKKAds1TjsAYnGqscXhGyjt3RvpA72/exec';
 
   let currentSplint = 'flexion';
   let entriesCache = { flexion: [], extension: [] };
@@ -254,6 +254,7 @@
     document.getElementById('tabFlexionBtn').classList.toggle('active', splint === 'flexion');
     document.getElementById('tabExtensionBtn').classList.toggle('active', splint === 'extension');
     document.getElementById('logTitle').textContent = (splint === 'flexion' ? 'Flexion' : 'Extension') + ' Log';
+    document.getElementById('mainSubtitle').textContent = 'Daily wear log for elbow ' + splint;
     renderLog();
     loadEntries(splint);
   }
