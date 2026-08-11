@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynasplint Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #2a2420;
+    --paper: #faf6f0;
+    --card: #ffffff;
+    --accent: #a45c40;
+    --accent-soft: #e8d9cf;
+    --line: #ddd2c6;
+    --danger: #b23b3b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    padding: 24px 16px 60px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    color: #6b6058;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    border-radius: 8px;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    margin: 0 0 14px;
+  }
+  label {
+    display: block;
+    font-size: 0.78rem;
+    color: #6b6058;
+    margin-bottom: 4px;
+    margin-top: 12px;
+  }
+  input, select, textarea {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  button.submit {
+    margin-top: 16px;
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  button.submit:disabled { opacity: 0.6; }
+  .status-msg {
+    margin-top: 10px;
+    font-size: 0.85rem;
+  }
+  .status-msg.ok { color: #2f7a4f; }
+  .status-msg.err { color: var(--danger); }
+  .log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .print-btn {
+    padding: 8px 14px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  th, td {
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    padding: 8px 6px;
+    vertical-align: top;
+  }
+  th {
+    color: #6b6058;
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .badge-yes {
+    color: var(--danger);
+    font-weight: 500;
+  }
+  .badge-no { color: #6b6058; }
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 0.78rem;
+    text-decoration: underline;
+    font-family: 'DM Mono', monospace;
+  }
+  .empty-state {
+    color: #6b6058;
+    font-size: 0.85rem;
+    padding: 10px 0;
+  }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .tabs, .card.entry-form, .print-btn, .del-btn { display: none !important; }
+    .card { border: none; padding: 0; }
+    h1 { font-size: 1.4rem; }
+    table { font-size: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Dynasplint Tracker</h1>
+<div class="subtitle">Daily wear log for elbow flexion and extension</div>
+
+<div class="tabs">
+  <button class="tab-btn active" id="tabFlexionBtn" onclick="switchTab('flexion')">Flexion</button>
+  <button class="tab-btn" id="tabExtensionBtn" onclick="switchTab('extension')">Extension</button>
+</div>
+
+<div class="card entry-form">
+  <h2>Log a session</h2>
+  <form id="entryForm">
+    <div class="row-2">
+      <div>
+        <label>Date</label>
+        <input type="date" id="fDate" required>
+      </div>
+      <div>
+        <label>Session</label>
+        <select id="fSession">
+          <option>Morning</option>
+          <option>Afternoon</option>
+          <option>Night</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="row-2">
+      <div>
+        <label>Duration worn (minutes)</label>
+        <input type="number" id="fDuration" min="0" required>
+      </div>
+      <div>
+        <label>Tension / increment</label>
+        <input type="text" id="fTension" required>
+      </div>
+    </div>
+    <div class="row-2">
+      <div>
+        <label>Discomfort</label>
+        <select id="fDiscomfort" onchange="toggleDiscomfortNotes()">
+          <option>No</option>
+          <option>Yes</option>
+        </select>
+      </div>
+      <div id="discomfortNotesWrap" style="display:none;">
+        <label>Discomfort notes</label>
+        <input type="text" id="fDiscomfortNotes" placeholder="Where, how long, etc.">
+      </div>
+    </div>
+    <label>Comments</label>
+    <textarea id="fComments" placeholder="How it went, how you're feeling, anything else"></textarea>
+    <button type="submit" class="submit" id="submitBtn">Log Session</button>
+    <div id="statusMsg"></div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="log-header">
+    <h2 id="logTitle" style="margin:0;">Flexion Log</h2>
+    <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+  </div>
+  <div id="logTableWrap">
+    <div class="empty-state">Loading...</div>
+  </div>
+</div>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdVmVJ_Dvfs2s8HnN4DM-YzND26eVJcu2R8bG5WbqsHXRD6Wtj18Z03oCGQtsyljRG/exec';
+
+  let currentSplint = 'flexion';
+  let entriesCache = { flexion: [], extension: [] };
+
+  function switchTab(splint) {
+    currentSplint = splint;
+    document.getElementById('tabFlexionBtn').classList.toggle('active', splint === 'flexion');
+    document.getElementById('tabExtensionBtn').classList.toggle('active', splint === 'extension');
+    document.getElementById('logTitle').textContent = (splint === 'flexion' ? 'Flexion' : 'Extension') + ' Log';
+    renderLog();
+    loadEntries(splint);
+  }
+
+  function toggleDiscomfortNotes() {
+    const val = document.getElementById('fDiscomfort').value;
+    document.getElementById('discomfortNotesWrap').style.display = (val === 'Yes') ? 'block' : 'none';
+  }
+
+  function loadEntries(splint) {
+    document.getElementById('logTableWrap').innerHTML = '<div class="empty-state">Loading...</div>';
+    fetch(SCRIPT_URL + '?action=list&splint=' + splint)
+      .then(r => r.json())
+      .then(data => {
+        entriesCache[splint] = data.entries || [];
+        if (currentSplint === splint) renderLog();
+      })
+      .catch(() => {
+        document.getElementById('logTableWrap').innerHTML = '<div class="empty-state">Could not load entries. Check the connection.</div>';
+      });
+  }
+
+  function renderLog() {
+    const entries = entriesCache[currentSplint] || [];
+    const wrap = document.getElementById('logTableWrap');
+    if (entries.length === 0) {
+      wrap.innerHTML = '<div class="empty-state">No entries logged yet.</div>';
+      return;
+    }
+    const sorted = entries.slice().sort((a, b) => (a.date + a.session).localeCompare(b.date + b.session));
+    let html = '<table><thead><tr><th>Date</th><th>Session</th><th>Duration</th><th>Tension</th><th>Discomfort</th><th>Comments</th><th class="del-col"></th></tr></thead><tbody>';
+    sorted.forEach(e => {
+      const discClass = e.discomfort === 'Yes' ? 'badge-yes' : 'badge-no';
+      const discText = e.discomfort === 'Yes' && e.discomfortNotes ? 'Yes - ' + e.discomfortNotes : e.discomfort;
+      html += '<tr>' +
+        '<td>' + escapeHtml(e.date) + '</td>' +
+        '<td>' + escapeHtml(e.session) + '</td>' +
+        '<td>' + escapeHtml(e.duration) + ' min</td>' +
+        '<td>' + escapeHtml(e.tension) + '</td>' +
+        '<td class="' + discClass + '">' + escapeHtml(discText) + '</td>' +
+        '<td>' + escapeHtml(e.comments) + '</td>' +
+        '<td class="del-col"><button class="del-btn" onclick="deleteEntry(' + e.rowIndex + ')">delete</button></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  }
+
+  function deleteEntry(rowIndex) {
+    if (!confirm('Delete this entry?')) return;
+    fetch(SCRIPT_URL + '?action=delete&splint=' + currentSplint + '&rowIndex=' + rowIndex)
+      .then(r => r.json())
+      .then(() => loadEntries(currentSplint));
+  }
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  document.getElementById('entryForm').addEventListener('submit', function(evt) {
+    evt.preventDefault();
+    const submitBtn = document.getElementById('submitBtn');
+    const statusMsg = document.getElementById('statusMsg');
+    submitBtn.disabled = true;
+    statusMsg.textContent = '';
+    statusMsg.className = 'status-msg';
+
+    const params = new URLSearchParams({
+      action: 'add',
+      splint: currentSplint,
+      date: document.getElementById('fDate').value,
+      session: document.getElementById('fSession').value,
+      duration: document.getElementById('fDuration').value,
+      tension: document.getElementById('fTension').value,
+      discomfort: document.getElementById('fDiscomfort').value,
+      discomfortNotes: document.getElementById('fDiscomfortNotes').value,
+      comments: document.getElementById('fComments').value
+    });
+
+    fetch(SCRIPT_URL + '?' + params.toString())
+      .then(r => r.json())
+      .then(data => {
+        submitBtn.disabled = false;
+        if (data.status === 'ok') {
+          statusMsg.textContent = 'Session logged.';
+          statusMsg.className = 'status-msg ok';
+          document.getElementById('entryForm').reset();
+          document.getElementById('fDate').valueAsDate = new Date();
+          toggleDiscomfortNotes();
+          loadEntries(currentSplint);
+        } else {
+          statusMsg.textContent = 'Something went wrong. Try again.';
+          statusMsg.className = 'status-msg err';
+        }
+      })
+      .catch(() => {
+        submitBtn.disabled = false;
+        statusMsg.textContent = 'Could not reach the tracker. Check the connection.';
+        statusMsg.className = 'status-msg err';
+      });
+  });
+
+  document.getElementById('fDate').valueAsDate = new Date();
+  loadEntries('flexion');
+  loadEntries('extension');
+</script>
+
+</body>
+</html>
