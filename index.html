@@ -72,6 +72,14 @@
     font-size: 1.1rem;
     margin: 0 0 14px;
   }
+  .goal-hint {
+    font-size: 0.82rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+  }
   label {
     display: block;
     font-size: 0.78rem;
@@ -90,6 +98,20 @@
     color: var(--ink);
   }
   textarea { resize: vertical; min-height: 60px; }
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    accent-color: var(--accent);
+  }
   .row-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -158,7 +180,7 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 0.82rem;
-    min-width: 600px;
+    min-width: 520px;
   }
   th, td {
     border-bottom: 1px solid var(--line);
@@ -183,6 +205,23 @@
   }
   .daily-total-row td {
     border-bottom: 2px solid var(--accent);
+  }
+  .current-week-row {
+    background: var(--accent-soft);
+    font-weight: 600;
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .current-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+    margin-left: 4px;
+    vertical-align: middle;
   }
   .del-btn {
     background: none;
@@ -229,26 +268,18 @@
 
 <div class="card entry-form">
   <h2>Log a session</h2>
+  <div class="goal-hint" id="goalHint">Goal: 2 hours per day</div>
   <form id="entryForm">
-    <div class="row-2">
-      <div>
-        <label>Date</label>
-        <input type="date" id="fDate" required>
-      </div>
-      <div>
-        <label>Session</label>
-        <select id="fSession">
-          <option>Morning</option>
-          <option>Afternoon</option>
-          <option>Night</option>
-          <option>Other</option>
-        </select>
-      </div>
-    </div>
+    <label>Date</label>
+    <input type="date" id="fDate" required>
     <div class="row-2">
       <div>
         <label>Duration worn (minutes)</label>
         <input type="number" id="fDuration" min="0" required>
+        <label class="checkbox-label">
+          <input type="checkbox" id="fOvernight" onchange="toggleOvernight()">
+          Slept in it overnight
+        </label>
       </div>
       <div>
         <label>Tension / increment</label>
@@ -282,6 +313,17 @@
 </div>
 
 <div class="card">
+  <h2 style="margin:0 0 4px;">Tension Schedule</h2>
+  <div class="goal-hint" style="margin-top:0;">Add one degree per splint at the start of each new week block</div>
+  <div class="table-scroll">
+    <table id="scheduleTable">
+      <thead><tr><th>Week</th><th>Dates</th><th>Flexion Tension</th><th>Extension Tension</th></tr></thead>
+      <tbody id="scheduleBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
   <div class="log-header">
     <h2 id="logTitle" style="margin:0;">Flexion Log</h2>
     <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
@@ -305,8 +347,24 @@
     document.getElementById('tabExtensionBtn').classList.toggle('active', splint === 'extension');
     document.getElementById('logTitle').textContent = (splint === 'flexion' ? 'Flexion' : 'Extension') + ' Log';
     document.getElementById('mainSubtitle').textContent = 'Daily wear log for elbow ' + splint;
+    document.getElementById('goalHint').textContent = (splint === 'flexion')
+      ? 'Goal: 2 hours per day'
+      : 'Goal: 4+ hours per day, ideally overnight if tolerated';
     renderLog();
     loadEntries(splint);
+  }
+
+  function toggleOvernight() {
+    const overnight = document.getElementById('fOvernight').checked;
+    const durationInput = document.getElementById('fDuration');
+    if (overnight) {
+      durationInput.disabled = true;
+      durationInput.required = false;
+      durationInput.value = '';
+    } else {
+      durationInput.disabled = false;
+      durationInput.required = true;
+    }
   }
 
   function toggleDiscomfortNotes() {
@@ -336,7 +394,7 @@
     }
     const sorted = entries.slice().sort((a, b) => (a.date + a.session).localeCompare(b.date + b.session));
 
-    let html = '<div class="table-scroll"><table><thead><tr><th>Date</th><th>Session</th><th>Duration</th><th>Tension</th><th>Discomfort</th><th>Pain</th><th>Comments</th><th class="del-col"></th></tr></thead><tbody>';
+    let html = '<div class="table-scroll"><table><thead><tr><th>Date</th><th>Duration</th><th>Tension</th><th>Discomfort</th><th>Pain</th><th>Comments</th><th class="del-col"></th></tr></thead><tbody>';
 
     let currentDate = null;
     let dailyTotal = 0;
@@ -352,8 +410,7 @@
       const discClass = e.discomfort === 'Yes' ? 'badge-yes' : 'badge-no';
       html += '<tr>' +
         '<td>' + escapeHtml(e.date) + '</td>' +
-        '<td>' + escapeHtml(e.session) + '</td>' +
-        '<td>' + escapeHtml(e.duration) + ' min</td>' +
+        '<td>' + escapeHtml(e.duration) + (e.duration === 'Overnight' ? '' : ' min') + '</td>' +
         '<td>' + escapeHtml(e.tension) + '</td>' +
         '<td class="' + discClass + '">' + escapeHtml(e.discomfort) + (e.discomfortNotes ? ' - ' + escapeHtml(e.discomfortNotes) : '') + '</td>' +
         '<td>' + escapeHtml(e.painLevel) + '</td>' +
@@ -370,7 +427,7 @@
   }
 
   function dailyTotalRow(date, total) {
-    return '<tr class="daily-total-row"><td colspan="2"><strong>' + escapeHtml(date) + ' total</strong></td>' +
+    return '<tr class="daily-total-row"><td><strong>' + escapeHtml(date) + ' total</strong></td>' +
       '<td><strong>' + total + ' min</strong></td>' +
       '<td colspan="5"></td></tr>';
   }
@@ -402,8 +459,7 @@
       action: 'add',
       splint: currentSplint,
       date: document.getElementById('fDate').value,
-      session: document.getElementById('fSession').value,
-      duration: document.getElementById('fDuration').value,
+      duration: document.getElementById('fOvernight').checked ? 'Overnight' : document.getElementById('fDuration').value,
       tension: document.getElementById('fTension').value,
       discomfort: document.getElementById('fDiscomfort').value,
       discomfortNotes: document.getElementById('fDiscomfortNotes').value,
@@ -421,6 +477,7 @@
           document.getElementById('entryForm').reset();
           document.getElementById('fDate').valueAsDate = new Date();
           toggleDiscomfortNotes();
+          toggleOvernight();
           loadEntries(currentSplint);
         } else {
           statusMsg.textContent = 'Something went wrong. Try again.';
@@ -434,6 +491,47 @@
       });
   });
 
+  function buildSchedule() {
+    const startDate = new Date(2026, 7, 13); // Aug 13, 2026
+    const flexionBase = 4;
+    const extensionBase = 2;
+    const weeks = 13;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const body = document.getElementById('scheduleBody');
+    let html = '';
+
+    for (let w = 0; w < weeks; w++) {
+      const weekStart = new Date(startDate);
+      weekStart.setDate(startDate.getDate() + w * 7);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+
+      const isCurrent = today >= weekStart && today <= weekEnd;
+      const rowClass = isCurrent ? ' class="current-week-row"' : '';
+      const weekLabel = (w + 1) + (isCurrent ? ' <span class="current-badge">CURRENT</span>' : '');
+
+      html += '<tr' + rowClass + '>' +
+        '<td>' + weekLabel + '</td>' +
+        '<td>' + formatShortDate(weekStart) + ' - ' + formatShortDate(weekEnd) + '</td>' +
+        '<td>' + (flexionBase + w) + '</td>' +
+        '<td>' + (extensionBase + w) + '</td>' +
+        '</tr>';
+    }
+    body.innerHTML = html;
+
+    const currentRow = body.querySelector('.current-week-row');
+    if (currentRow) {
+      currentRow.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function formatShortDate(d) {
+    return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+  }
+
+  buildSchedule();
   document.getElementById('fDate').valueAsDate = new Date();
   loadEntries('flexion');
   loadEntries('extension');
