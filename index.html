@@ -140,17 +140,27 @@
       padding: 15px;
     }
     #scheduleTable th, #scheduleTable td {
-      padding: 8px 8px;
-      font-size: 0.78rem;
+      padding: 8px 3px;
+      font-size: 0.72rem;
     }
   }
   .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  #scheduleTable td, #scheduleTable th {
-    white-space: nowrap;
+  #scheduleTable {
+    min-width: 0;
+    table-layout: fixed;
   }
+  #scheduleTable td, #scheduleTable th {
+    white-space: normal;
+    padding: 10px 4px;
+    text-align: center;
+  }
+  #scheduleTable th:nth-child(1), #scheduleTable td:nth-child(1) { width: 12%; }
+  #scheduleTable th:nth-child(2), #scheduleTable td:nth-child(2) { width: 46%; }
+  #scheduleTable th:nth-child(3), #scheduleTable td:nth-child(3) { width: 21%; }
+  #scheduleTable th:nth-child(4), #scheduleTable td:nth-child(4) { width: 21%; }
   button.submit {
     margin-top: 16px;
     width: 100%;
@@ -222,17 +232,6 @@
     font-weight: 600;
     outline: 2px solid var(--accent);
     outline-offset: -2px;
-  }
-  .current-badge {
-    display: inline-block;
-    background: var(--accent);
-    color: #fff;
-    font-size: 0.65rem;
-    padding: 2px 6px;
-    border-radius: 4px;
-    letter-spacing: 0.03em;
-    margin-left: 4px;
-    vertical-align: middle;
   }
   .del-btn {
     background: none;
@@ -328,7 +327,7 @@
   <div class="goal-hint" style="margin-top:0;">Add one degree per splint at the start of each new week block</div>
   <div class="table-scroll">
     <table id="scheduleTable">
-      <thead><tr><th>Week</th><th>Dates</th><th>Flexion Tension</th><th>Extension Tension</th></tr></thead>
+      <thead><tr><th>Week</th><th>Dates</th><th>Flexion</th><th>Extension</th></tr></thead>
       <tbody id="scheduleBody"></tbody>
     </table>
   </div>
@@ -521,21 +520,15 @@
 
       const isCurrent = today >= weekStart && today <= weekEnd;
       const rowClass = isCurrent ? ' class="current-week-row"' : '';
-      const weekLabel = (w + 1) + (isCurrent ? ' <span class="current-badge">CURRENT</span>' : '');
 
       html += '<tr' + rowClass + '>' +
-        '<td>' + weekLabel + '</td>' +
+        '<td>' + (w + 1) + '</td>' +
         '<td>' + formatShortDate(weekStart) + ' - ' + formatShortDate(weekEnd, weekStart) + '</td>' +
         '<td>' + (flexionBase + w) + '</td>' +
         '<td>' + (extensionBase + w) + '</td>' +
         '</tr>';
     }
     body.innerHTML = html;
-
-    const currentRow = body.querySelector('.current-week-row');
-    if (currentRow) {
-      currentRow.scrollIntoView({ block: 'nearest' });
-    }
   }
 
   function formatShortDate(d, refDate) {
