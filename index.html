@@ -250,7 +250,7 @@
 
   @media print {
     body { background: #fff; padding: 0; }
-    .tabs, .card.entry-form, .print-btn, .del-btn { display: none !important; }
+    .tabs, .card.entry-form, .print-btn, .del-btn, #tensionScheduleCard { display: none !important; }
     .card { border: none; padding: 0; }
     h1 { font-size: 1.4rem; }
     table { font-size: 0.8rem; }
@@ -293,7 +293,13 @@
       </div>
       <div>
         <label>Tension / increment</label>
-        <input type="text" id="fTension" required>
+        <select id="fTension" required>
+          <option value="">Select</option>
+          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+          <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+          <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+        </select>
       </div>
     </div>
     <div class="row-2">
@@ -322,7 +328,7 @@
   </form>
 </div>
 
-<div class="card">
+<div class="card" id="tensionScheduleCard">
   <h2 style="margin:0 0 4px;">Tension Schedule</h2>
   <div class="goal-hint" style="margin-top:0;">Add one degree per splint at the start of each new week block</div>
   <div class="table-scroll">
