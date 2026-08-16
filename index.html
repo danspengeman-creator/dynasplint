@@ -102,7 +102,11 @@
     color: var(--ink);
   }
   textarea { resize: vertical; min-height: 60px; }
-  .checkbox-label {
+  .duration-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
     display: flex;
     align-items: center;
     gap: 6px;
@@ -284,8 +288,28 @@
     <input type="date" id="fDate" required>
     <div class="row-2">
       <div>
-        <label>Duration worn (minutes)</label>
-        <input type="number" id="fDuration" min="0" required>
+        <label>Duration worn</label>
+        <div class="duration-picker">
+          <select id="fHours">
+            <option value="0">0 hr</option>
+            <option value="1">1 hr</option>
+            <option value="2">2 hr</option>
+            <option value="3">3 hr</option>
+            <option value="4">4 hr</option>
+            <option value="5">5 hr</option>
+            <option value="6">6 hr</option>
+            <option value="7">7 hr</option>
+            <option value="8">8 hr</option>
+          </select>
+          <select id="fMinutes">
+            <option value="0">0 min</option>
+            <option value="10">10 min</option>
+            <option value="20">20 min</option>
+            <option value="30">30 min</option>
+            <option value="40">40 min</option>
+            <option value="50">50 min</option>
+          </select>
+        </div>
         <label class="checkbox-label">
           <input type="checkbox" id="fOvernight" onchange="toggleOvernight()">
           Slept in it overnight
@@ -293,13 +317,7 @@
       </div>
       <div>
         <label>Tension / increment</label>
-        <select id="fTension" required>
-          <option value="">Select</option>
-          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-          <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
-          <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
-          <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
-        </select>
+        <select id="fTension" required></select>
       </div>
     </div>
     <div class="row-2">
@@ -366,20 +384,51 @@
     document.getElementById('goalHint').textContent = (splint === 'flexion')
       ? 'Goal: 2 hours per day'
       : 'Goal: 4+ hours per day, ideally overnight if tolerated';
+    populateTensionSelect();
     renderLog();
     loadEntries(splint);
   }
 
-  function toggleOvernight() {
+  function getCurrentWeekGoal(splint) {
+    const startDate = new Date(2026, 7, 13);
+    const flexionBase = 4;
+    const extensionBase = 2;
+    const weeks = 13;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let w = 0; w < weeks; w++) {
+      const weekStart = new Date(startDate);
+      weekStart.setDate(startDate.getDate() + w * 7);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      if (today >= weekStart && today <= weekEnd) {
+        return (splint === 'flexion') ? (flexionBase + w) : (extensionBase + w);
+      }
+    }
+    return null;
+  }
+
+  function populateTensionSelect() {
+    const goal = getCurrentWeekGoal(currentSplint);
+    const select = document.getElementById('fTension');
+    let html = '<option value="">Select</option>';
+    for (let i = 1; i <= 20; i++) {
+      const isGoal = (i === goal);
+      html += '<option value="' + i + '"' + (isGoal ? ' selected' : '') + '>' +
+        i + (isGoal ? ' (this week\'s goal)' : '') +
+        '</option>';
+    }
+    select.innerHTML = html;
+  }
     const overnight = document.getElementById('fOvernight').checked;
-    const durationInput = document.getElementById('fDuration');
+    const hoursSelect = document.getElementById('fHours');
+    const minutesSelect = document.getElementById('fMinutes');
+    hoursSelect.disabled = overnight;
+    minutesSelect.disabled = overnight;
     if (overnight) {
-      durationInput.disabled = true;
-      durationInput.required = false;
-      durationInput.value = '';
-    } else {
-      durationInput.disabled = false;
-      durationInput.required = true;
+      hoursSelect.value = '0';
+      minutesSelect.value = '0';
     }
   }
 
@@ -475,7 +524,9 @@
       action: 'add',
       splint: currentSplint,
       date: document.getElementById('fDate').value,
-      duration: document.getElementById('fOvernight').checked ? 'Overnight' : document.getElementById('fDuration').value,
+      duration: document.getElementById('fOvernight').checked
+        ? 'Overnight'
+        : String(parseInt(document.getElementById('fHours').value, 10) * 60 + parseInt(document.getElementById('fMinutes').value, 10)),
       tension: document.getElementById('fTension').value,
       discomfort: document.getElementById('fDiscomfort').value,
       discomfortNotes: document.getElementById('fDiscomfortNotes').value,
@@ -494,6 +545,7 @@
           document.getElementById('fDate').valueAsDate = new Date();
           toggleDiscomfortNotes();
           toggleOvernight();
+          populateTensionSelect();
           loadEntries(currentSplint);
         } else {
           statusMsg.textContent = 'Something went wrong. Try again.';
@@ -546,6 +598,7 @@
   }
 
   buildSchedule();
+  populateTensionSelect();
   document.getElementById('fDate').valueAsDate = new Date();
   loadEntries('flexion');
   loadEntries('extension');
