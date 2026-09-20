@@ -2,1251 +2,618 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Elbow PT Timer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynasplint Tracker</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b0d10">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#a45c40">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0b0d10;
-    --card:#15181d;
-    --card-hover:#1b1f26;
-    --line:#262a31;
-    --text:#eef1f3;
-    --sub:#8b939b;
-    --press:#ef8354;
-    --rest:#4fd1c5;
-    --done:#7fd88f;
-    --switch:#c58cff;
+  :root {
+    --ink: #2a2420;
+    --paper: #faf6f0;
+    --card: #ffffff;
+    --accent: #a45c40;
+    --accent-soft: #e8d9cf;
+    --line: #ddd2c6;
+    --danger: #b23b3b;
   }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;}
-  body{
-    padding-bottom:env(safe-area-inset-bottom, 0px);
-    overscroll-behavior-y:contain;
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    padding: 24px 16px 60px;
   }
-  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;}
-  .wrap{max-width:880px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top,0px)) 16px 60px;}
-  header{margin-bottom:28px;}
-  header .eyebrow{color:var(--sub);font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;}
-  header h1{font-size:40px;line-height:1.1;}
-  header .meta{color:var(--sub);font-size:14px;margin-top:8px;}
-  header .encourage{font-family:'Fraunces',serif;font-size:19px;color:var(--press);margin-top:14px;font-style:italic;}
-  .reset-all-btn{
-    margin-top:16px;padding:10px 16px;border-radius:8px;border:1px solid var(--line);
-    background:none;color:var(--sub);font-family:'DM Mono',monospace;font-size:14px;
-    cursor:pointer;min-height:44px;touch-action:manipulation;
+  @media (max-width: 480px) {
+    body { padding: 16px 10px 50px; }
   }
-  .reset-all-btn:hover{color:var(--text);border-color:#3a4048;}
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    color: #6b6058;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    border-radius: 8px;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    margin: 0 0 14px;
+  }
+  .goal-hint {
+    font-size: 0.82rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+  }
+  label {
+    display: block;
+    font-size: 0.78rem;
+    color: #6b6058;
+    margin-bottom: 4px;
+    margin-top: 12px;
+  }
+  input, select, textarea {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  .duration-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    accent-color: var(--accent);
+  }
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (max-width: 480px) {
+    .row-2 {
+      grid-template-columns: 1fr;
+    }
+    .tabs {
+      gap: 6px;
+    }
+    .tab-btn {
+      padding: 14px 8px;
+      font-size: 0.95rem;
+    }
+    input, select, textarea {
+      font-size: 16px;
+      padding: 11px 10px;
+    }
+    button.submit {
+      padding: 15px;
+    }
+    #scheduleTable th, #scheduleTable td {
+      padding: 8px 3px;
+      font-size: 0.72rem;
+    }
+  }
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #scheduleTable {
+    min-width: 0;
+    table-layout: fixed;
+  }
+  #scheduleTable td, #scheduleTable th {
+    white-space: normal;
+    padding: 10px 4px;
+    text-align: center;
+  }
+  #scheduleTable th:nth-child(1), #scheduleTable td:nth-child(1) { width: 14%; }
+  #scheduleTable th:nth-child(2), #scheduleTable td:nth-child(2) { width: 60%; }
+  #scheduleTable th:nth-child(3), #scheduleTable td:nth-child(3) { width: 26%; }
+  button.submit {
+    margin-top: 16px;
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  button.submit:disabled { opacity: 0.6; }
+  .status-msg {
+    margin-top: 10px;
+    font-size: 0.85rem;
+  }
+  .status-msg.ok { color: #2f7a4f; }
+  .status-msg.err { color: var(--danger); }
+  .log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .print-btn {
+    padding: 8px 14px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    min-width: 520px;
+  }
+  th, td {
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    padding: 8px 6px;
+    vertical-align: top;
+  }
+  th {
+    color: #6b6058;
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .badge-yes {
+    color: var(--danger);
+    font-weight: 500;
+  }
+  .badge-no { color: #6b6058; }
+  .daily-total-row {
+    background: var(--accent-soft);
+  }
+  .daily-total-row td {
+    border-bottom: 2px solid var(--accent);
+  }
+  .current-week-row {
+    background: var(--accent-soft);
+    font-weight: 600;
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 0.78rem;
+    text-decoration: underline;
+    font-family: 'DM Mono', monospace;
+  }
+  .empty-state {
+    color: #6b6058;
+    font-size: 0.85rem;
+    padding: 10px 0;
+  }
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
-  .card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:16px;
-    cursor:pointer;
-    touch-action:manipulation;
-    transition:border-color .15s, background .15s, transform .15s;
-    text-align:left;
-    position:relative;
+  @media print {
+    body { background: #fff; padding: 0; }
+    .tabs, .card.entry-form, .print-btn, .del-btn, #tensionScheduleCard { display: none !important; }
+    .card { border: none; padding: 0; }
+    h1 { font-size: 1.4rem; }
+    table { font-size: 0.8rem; }
+    .print-footer { display: block !important; }
   }
-  .card.completed{
-    background:rgba(127,216,143,0.08);
-    border-color:var(--done);
-  }
-  .card .check-badge{
-    display:none;position:absolute;top:12px;right:12px;
-    width:22px;height:22px;border-radius:50%;background:var(--done);
-    color:#0b2011;font-size:14px;font-weight:700;align-items:center;justify-content:center;
-  }
-  .card.completed .check-badge{display:flex;}
-  .card:hover{background:var(--card-hover);border-color:#3a4048;transform:translateY(-1px);}
-  .card .idx{color:var(--sub);font-size:12px;letter-spacing:.1em;}
-  .card h3{font-size:22px;margin-top:4px;line-height:1.2;}
-  .card .cat{display:inline-block;margin-top:8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--bg);background:var(--sub);padding:2px 7px;border-radius:20px;}
-  .card .equip{display:inline-block;margin-top:8px;margin-left:6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:20px;border:1px solid currentColor;}
-  .card .equip.equip-weight{color:var(--press);}
-  .card .equip.equip-band{color:var(--rest);}
-  .card .equip.equip-towel{color:var(--switch);}
-  .card .equip.equip-none{color:var(--sub);}
-  .card .spec{color:var(--sub);font-size:14px;margin-top:10px;line-height:1.5;}
-
-  /* Setup / run screen */
-  .screen{display:none;}
-  .screen.active{display:block;}
-  .back{
-    background:var(--card);border:1px solid var(--line);color:var(--text);
-    font-family:'DM Mono',monospace;font-size:16px;cursor:pointer;
-    padding:12px 18px;margin-bottom:14px;min-height:48px;border-radius:8px;
-    touch-action:manipulation;display:inline-flex;align-items:center;gap:6px;
-  }
-  .back:hover{color:var(--text);border-color:var(--press);background:var(--card-hover);}
-
-  .setup-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 18px;}
-  .setup-card h2{font-size:28px;margin-bottom:4px;}
-  .setup-card .cat{display:inline-block;margin-top:6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--bg);background:var(--sub);padding:2px 7px;border-radius:20px;}
-  .setup-card .note{color:var(--sub);font-size:15px;margin-top:14px;line-height:1.6;}
-
-  .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-top:20px;}
-  .field label{display:block;color:var(--sub);font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
-  .field input{
-    width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);
-    font-family:'DM Mono',monospace;font-size:18px;padding:12px;border-radius:8px;
-    min-height:44px;
-  }
-  .field input:focus{outline:none;border-color:var(--press);}
-
-  .phase-list{margin-top:16px;font-size:15px;color:var(--sub);}
-  .phase-list div{padding:4px 0;border-bottom:1px dashed var(--line);}
-
-  .primary-btn{
-    margin-top:24px;width:100%;padding:16px;border-radius:10px;border:none;
-    background:var(--press);color:#1a0d05;font-family:'DM Mono',monospace;font-weight:500;
-    font-size:18px;letter-spacing:.04em;cursor:pointer;min-height:52px;touch-action:manipulation;
-    box-shadow:0 3px 0 rgba(0,0,0,0.35);transition:transform .08s, box-shadow .08s, filter .1s;
-  }
-  .primary-btn:hover{filter:brightness(1.08);}
-  .primary-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,0.35);}
-
-  .mark-btn{
-    margin-top:10px;width:100%;padding:14px;border-radius:10px;
-    background:none;border:1px solid var(--line);color:var(--sub);
-    font-family:'DM Mono',monospace;font-size:16px;cursor:pointer;min-height:48px;
-    touch-action:manipulation;transition:transform .08s, box-shadow .08s;
-  }
-  .mark-btn.is-complete{border-color:var(--done);color:var(--done);}
-  .mark-btn:active{transform:scale(.97);box-shadow:inset 0 2px 6px rgba(0,0,0,0.4);}
-
-  /* Run screen */
-  .run{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 18px;text-align:center;}
-  .run h2{font-size:24px;margin-bottom:2px;}
-  .run .phase-label{color:var(--sub);font-size:15px;margin-bottom:16px;letter-spacing:.06em;text-transform:uppercase;}
-
-  .dial{
-    width:min(320px,78vw);height:min(320px,78vw);border-radius:50%;
-    margin:0 auto 20px;display:flex;align-items:center;justify-content:center;
-    border:6px solid var(--line);position:relative;transition:border-color .2s;
-  }
-  .dial.mode-press{border-color:var(--press);}
-  .dial.mode-rest{border-color:var(--rest);}
-  .dial.mode-done{border-color:var(--done);}
-  .dial .num{font-family:'Fraunces',serif;font-size:min(120px,26vw);font-weight:600;line-height:1;}
-  .dial .unit{position:absolute;bottom:24%;font-size:13px;color:var(--sub);letter-spacing:.1em;text-transform:uppercase;}
-
-  .switch{ /* namespace anchor, unused */ }
-  .switch-banner{
-    width:100%;
-    background:linear-gradient(135deg, #3a2a55, #241b38);
-    border:2px solid var(--switch);
-    border-radius:18px;
-    padding:28px 20px;
-    margin:0 auto 20px;
-    text-align:center;
-    animation:switchPulse 0.7s ease-in-out infinite;
-  }
-  @keyframes switchPulse{
-    0%{box-shadow:0 0 0 0 rgba(197,140,255,0.35);}
-    50%{box-shadow:0 0 0 10px rgba(197,140,255,0);}
-    100%{box-shadow:0 0 0 0 rgba(197,140,255,0);}
-  }
-  .switch-title{font-family:'Fraunces',serif;font-size:26px;color:var(--switch);letter-spacing:.02em;margin-bottom:8px;}
-  .switch-next{font-size:20px;color:var(--text);margin-bottom:14px;}
-  .switch-count{font-family:'Fraunces',serif;font-size:56px;color:var(--switch);line-height:1;}
-
-  .state-word{font-size:17px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
-  .state-word.press{color:var(--press);}
-  .state-word.rest{color:var(--rest);}
-  .state-word.done{color:var(--done);}
-
-  .rep-counter{font-size:26px;color:var(--sub);margin-bottom:18px;font-weight:500;}
-  .rep-counter span{color:var(--press);font-family:'Fraunces',serif;font-weight:600;font-size:30px;}
-
-  .dashes{display:flex;flex-wrap:nowrap;gap:3px;justify-content:center;width:100%;margin:0 auto 22px;overflow:hidden;}
-  .dash{flex:1 1 0;min-width:2px;max-width:14px;height:16px;border-radius:2px;background:var(--line);}
-  .dash.filled{background:var(--press);}
-  .dash.filled.rest-marker{background:var(--rest);}
-
-  .controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;touch-action:manipulation;}
-  .ctrl-btn{
-    padding:14px 22px;border-radius:8px;border:1px solid var(--line);background:var(--bg);
-    color:var(--text);font-family:'DM Mono',monospace;font-size:17px;cursor:pointer;
-    min-height:48px;flex:1 1 130px;max-width:220px;touch-action:manipulation;
-    box-shadow:0 3px 0 rgba(0,0,0,0.3);transition:transform .08s, box-shadow .08s, filter .1s, border-color .15s, background .15s;
-  }
-  .ctrl-btn:hover{border-color:#3a4048;}
-  .ctrl-btn:active{transform:translateY(2px);box-shadow:0 0 0 rgba(0,0,0,0);}
-  .ctrl-btn.primary{background:var(--press);color:#1a0d05;border-color:var(--press);}
-  .ctrl-btn.primary:hover{filter:brightness(1.08);}
-  .ctrl-btn.is-paused{background:var(--switch);border-color:var(--switch);color:#1a0d2e;}
-
-  .break-banner{
-    width:100%;
-    background:linear-gradient(135deg, #1c3a3f, #142a2d);
-    border:2px solid var(--rest);
-    border-radius:18px;
-    padding:28px 20px;
-    margin:0 auto 20px;
-    text-align:center;
-  }
-  .break-title{font-family:'Fraunces',serif;font-size:26px;color:var(--rest);letter-spacing:.02em;margin-bottom:14px;}
-  .break-count{font-family:'Fraunces',serif;font-size:64px;color:var(--rest);line-height:1;margin-bottom:18px;}
-
-  .sound-toggle{
-    color:var(--sub);font-size:13px;cursor:pointer;user-select:none;
-    padding:10px 16px;border:1px solid var(--line);border-radius:8px;
-    background:var(--card);touch-action:manipulation;min-height:40px;
-    display:inline-flex;align-items:center;
-  }
-  .sound-toggle.on{color:#e8c94a;border-color:#e8c94a;}
-  .sound-toggle.off{color:var(--sub);border-color:var(--line);}
-  .run-toolbar{display:flex;justify-content:flex-end;margin-bottom:14px;}
-  .run-wrap{position:relative;}
-
-  .celebrate-wrap{position:relative;}
-  .dial.mode-done{animation:pulse 0.9s ease-in-out infinite;}
-  @keyframes pulse{
-    0%{transform:scale(1);}
-    50%{transform:scale(1.045);}
-    100%{transform:scale(1);}
-  }
-  .confetti{
-    position:absolute;top:-10px;left:0;right:0;height:0;pointer-events:none;
-  }
-  .confetti span{
-    position:absolute;top:0;font-size:18px;opacity:0;
-    animation:fall 1.6s ease-in forwards;
-  }
-  @keyframes fall{
-    0%{transform:translateY(-10px) rotate(0deg);opacity:1;}
-    100%{transform:translateY(240px) rotate(300deg);opacity:0;}
-  }
-  .great-job{font-family:'Fraunces',serif;font-size:30px;color:var(--done);margin-bottom:2px;opacity:0;animation:pop .5s ease-out forwards;}
-
-  .alldone-card{
-    background:var(--card);border:1px solid var(--done);border-radius:18px;
-    padding:60px 24px;text-align:center;position:relative;overflow:hidden;
-    margin-top:40px;
-  }
-  .alldone-title{font-family:'Fraunces',serif;font-size:44px;color:var(--done);margin-bottom:14px;}
-  .alldone-sub{color:var(--sub);font-size:17px;margin-bottom:28px;line-height:1.5;}
-  .alldone-confetti{position:absolute;top:-10px;left:0;right:0;height:0;pointer-events:none;}
-  .alldone-confetti span{position:absolute;top:0;font-size:20px;opacity:0;animation:fall 1.8s ease-in forwards;}
-  @keyframes pop{
-    0%{opacity:0;transform:scale(.85);}
-    60%{opacity:1;transform:scale(1.06);}
-    100%{opacity:1;transform:scale(1);}
-  }
-  @media (max-width:520px){
-    header h1{font-size:30px;}
-    .wrap{padding-left:14px;padding-right:14px;}
-  }
-  @media (max-width:360px){
-    .run{padding:22px 12px;}
-    .ctrl-btn{flex:1 1 100%;max-width:none;}
-  }
-
-  .rotate-blocker{
-    display:none;
-    position:fixed;inset:0;background:var(--bg);z-index:9999;
-    align-items:center;justify-content:center;text-align:center;padding:30px;
-  }
-  .rotate-blocker .msg{font-family:'Fraunces',serif;font-size:24px;color:var(--text);max-width:320px;}
-  .rotate-blocker .msg span{display:block;font-family:'DM Mono',monospace;font-size:14px;color:var(--sub);margin-top:10px;}
-  @media (orientation:landscape) and (max-height:600px){
-    .rotate-blocker{display:flex;}
+  .print-footer {
+    display: none;
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-size: 0.78rem;
+    color: #6b6058;
   }
 </style>
 </head>
 <body>
-<div class="rotate-blocker">
-  <div class="msg">Please rotate your phone back to portrait<span>This app is designed for vertical use only.</span></div>
-</div>
-<div class="wrap">
 
-  <div id="screen-list" class="screen active">
-    <header>
-      <h1>Elbow PT Timer</h1>
-      <div class="meta">Pick an exercise. Adjust reps, hold, and rest if needed. Press start.</div>
-      <div class="encourage">Make the Spear team proud.</div>
-      <button class="reset-all-btn" onclick="resetAllCompleted()">Reset today's checkmarks</button>
-    </header>
-    <div class="grid" id="exercise-grid"></div>
-  </div>
+<h1>Dynasplint Tracker</h1>
+<div class="subtitle" id="mainSubtitle">Daily wear log for elbow flexion and extension</div>
 
-  <div id="screen-setup" class="screen">
-    <button class="back" onclick="goToList()">&larr; All exercises</button>
-    <div class="setup-card">
-      <div id="setup-cat" class="cat"></div>
-      <h2 id="setup-name"></h2>
-      <div id="setup-note" class="note"></div>
-      <div id="setup-fields" class="fields"></div>
-      <div id="setup-phaselist" class="phase-list"></div>
-      <button class="primary-btn" onclick="startExercise()">Start</button>
-      <button class="mark-btn" id="setup-mark-btn" onclick="toggleMarkComplete()">Mark as completed</button>
-    </div>
-  </div>
-
-  <div id="screen-run" class="screen">
-    <button class="back" onclick="goToList()">&larr; All exercises</button>
-    <div class="run-wrap">
-      <div class="run-toolbar">
-        <div class="sound-toggle on" id="sound-toggle" onclick="toggleSound()">sound: on</div>
-      </div>
-      <div class="run">
-        <h2 id="run-name"></h2>
-        <div class="phase-label" id="run-phase-label"></div>
-        <div class="great-job" id="great-job" style="display:none;">Nice work!</div>
-        <div class="state-word" id="run-state"></div>
-        <div class="dial" id="run-dial">
-          <div class="confetti" id="confetti"></div>
-          <div class="num" id="run-num">0</div>
-          <div class="unit">sec</div>
-        </div>
-        <div class="switch-banner" id="switch-banner" style="display:none;">
-          <div class="switch-title" id="switch-title">Switch directions</div>
-          <div class="switch-next" id="switch-next"></div>
-          <div class="switch-count" id="switch-count"></div>
-        </div>
-        <div class="break-banner" id="break-banner" style="display:none;">
-          <div class="break-title">Taking a break</div>
-          <div class="break-count" id="break-count">60</div>
-          <button class="ctrl-btn" onclick="skipBreak()">Resume now</button>
-        </div>
-        <div class="rep-counter" id="run-rep"></div>
-        <div class="dashes" id="run-dashes"></div>
-        <div class="controls">
-          <button class="ctrl-btn primary" id="btn-toggle" onclick="togglePause()">Pause</button>
-          <button class="ctrl-btn" id="btn-reset" onclick="resetExercise()">Reset</button>
-          <button class="ctrl-btn" id="btn-break" onclick="startBreak()">Take a break</button>
-          <button class="ctrl-btn primary" id="btn-next" onclick="goToNextExercise()" style="display:none;">Ready for next exercise</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="screen-alldone" class="screen">
-    <div class="alldone-card">
-      <div class="alldone-confetti" id="alldone-confetti"></div>
-      <div class="alldone-title">Well done!</div>
-      <div class="alldone-sub">Every exercise is complete. Make the Spear team proud today.</div>
-      <button class="primary-btn" onclick="goToList()">Back to exercises</button>
-    </div>
-  </div>
-
+<div class="tabs">
+  <button class="tab-btn active" id="tabFlexionBtn" onclick="switchTab('flexion')">Flexion</button>
+  <button class="tab-btn" id="tabExtensionBtn" onclick="switchTab('extension')">Extension</button>
 </div>
 
+<div class="card entry-form">
+  <h2>Log a session</h2>
+  <div class="goal-hint" id="goalHint">Goal: 2 hours per day</div>
+  <form id="entryForm">
+    <label>Date</label>
+    <input type="date" id="fDate" required>
+    <div class="row-2">
+      <div>
+        <label>Duration worn</label>
+        <div class="duration-picker">
+          <select id="fHours">
+            <option value="0">0 hr</option>
+            <option value="1">1 hr</option>
+            <option value="2">2 hr</option>
+            <option value="3">3 hr</option>
+            <option value="4">4 hr</option>
+            <option value="5">5 hr</option>
+            <option value="6">6 hr</option>
+            <option value="7">7 hr</option>
+            <option value="8">8 hr</option>
+          </select>
+          <select id="fMinutes">
+            <option value="0">0 min</option>
+            <option value="10">10 min</option>
+            <option value="20">20 min</option>
+            <option value="30">30 min</option>
+            <option value="40">40 min</option>
+            <option value="50">50 min</option>
+          </select>
+        </div>
+        <label class="checkbox-label">
+          <input type="checkbox" id="fOvernight" onchange="toggleOvernight()">
+          Slept in it overnight
+        </label>
+      </div>
+      <div>
+        <label>Tension / increment</label>
+        <select id="fTension" required></select>
+      </div>
+    </div>
+    <div class="row-2">
+      <div>
+        <label>Discomfort</label>
+        <select id="fDiscomfort" onchange="toggleDiscomfortNotes()">
+          <option>No</option>
+          <option>Yes</option>
+        </select>
+      </div>
+      <div id="discomfortNotesWrap" style="display:none;">
+        <label>Pain level (0-10)</label>
+        <select id="fPainLevel">
+          <option value="">Select</option>
+          <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option>
+          <option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+        </select>
+        <label>Discomfort notes</label>
+        <input type="text" id="fDiscomfortNotes" placeholder="Where, how long, etc.">
+      </div>
+    </div>
+    <label>Comments</label>
+    <textarea id="fComments" placeholder="How it went, how you're feeling, anything else"></textarea>
+    <button type="submit" class="submit" id="submitBtn">Log Session</button>
+    <div id="statusMsg"></div>
+  </form>
+</div>
+
+<div class="card" id="tensionScheduleCard">
+  <h2 style="margin:0 0 4px;">Tension Schedule</h2>
+  <div class="goal-hint" id="scheduleHint" style="margin-top:0;">Add one degree at the start of each new week block</div>
+  <div class="table-scroll">
+    <table id="scheduleTable">
+      <thead><tr><th>Week</th><th>Dates</th><th id="scheduleTensionHeader">Flexion</th></tr></thead>
+      <tbody id="scheduleBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="log-header">
+    <h2 id="logTitle" style="margin:0;">Flexion Log</h2>
+    <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+  </div>
+  <div id="logTableWrap">
+    <div class="empty-state">Loading...</div>
+  </div>
+</div>
+
+<div class="print-footer">Patient: Dan Spengeman &nbsp;|&nbsp; DOB: 8-4-1982</div>
 
 <script>
-// ---- Exercise data ----
-// type: "reps" (press/rest cycles) or "hold" (single sustained hold, no reps)
-// phases: for multi-direction exercises, an array of {label, reps}; otherwise a single implicit phase
-const EXERCISES = [
-  { id:1, name:"Seated flexion overpressure", cat:"Flexion", equip:"none", voiceCountdown:true,
-    note:"Passive-assisted elbow flexion stretch. Target intensity 5 to 7 out of 10. Can also be done standing, using the wall to push against the back of the hand or wrist for additional overpressure.",
-    holdSec:20, restSec:20, reps:20 },
-  { id:2, name:"Lying weighted hang", cat:"Extension", type:"hold", equip:"weight", voiceCountdown:true,
-    note:"Gravity-assisted passive elbow extension stretch, split into two three-minute holds with a short break in between to readjust. Let the weight hang fully for the entire three minutes each time. Use a 2 to 5 lb weight.",
-    holdSegments:[180,180], holdBreakSec:30 },
-  { id:3, name:"Standing weighted extension drop", cat:"Extension", equip:"weight", voiceCountdown:true,
-    note:"Start with the weight held close to the chest, then slowly extend the arm straight down over about 15 seconds, holding briefly at full extension at the end.",
-    holdSec:15, restSec:3, reps:20 },
-  { id:4, name:"Standing table push extension", cat:"Extension", equip:"none",
-    note:"Stand with hands on a table at a slight angle, holding yourself up, then push outward through both arms and shoulders to straighten the arms as much as possible.",
-    holdSec:5, restSec:3, reps:20 },
-  { id:5, name:"Elbow distraction stretch", cat:"Flexion", equip:"towel", voiceCountdown:true,
-    note:"Similar to seated flexion overpressure, but with a rolled towel or small pillow placed in the fold of the elbow to add distraction.",
-    holdSec:20, restSec:20, reps:20 },
-  { id:6, name:"Standing extension and flexion", cat:"Flexion/Extension", equip:"none", voiceCountdown:true,
-    note:"Self-resistance against the wrist. For flexion, push down on the wrist and try to bring the arm up. For extension, push up on the wrist with resistance and let it release back down. A longer rest kicks in when switching to the next phase.",
-    holdSec:8, restSec:2, phaseGapSec:5,
-    phases:[
-      { label:"Flexion", reps:20 },
-      { label:"Extension", reps:20 },
-    ]},
-  { id:7, name:"Seated weighted lift", cat:"Strengthening", equip:"weight",
-    note:"Arm rotated through three directions with a weight, one set per direction. A longer rest kicks in when switching direction.",
-    holdSec:5, restSec:3, phaseGapSec:5,
-    phases:[
-      { label:"Upward", reps:24 },
-      { label:"Sideways", reps:24 },
-      { label:"Downward", reps:24 },
-    ]},
-  { id:8, name:"Pronation-supination weight turn", cat:"Rotation", equip:"weight",
-    note:"Hold a weight with the arm straight, starting turned left, then rotate to the right and back, holding at each side.",
-    holdStages:[ { sec:5, label:"Turn left" }, { sec:5, label:"Turn right" } ],
-    restSec:3, reps:20 },
-  { id:9, name:"Resistance band side step (Mario jump)", cat:"Strengthening", equip:"band",
-    note:"Elastic resistance side step to the right with a 90-degree punch up on the out motion.",
-    holdSec:3, restSec:3, reps:20 },
-  { id:10, name:"Standing chop", cat:"Functional", equip:"none",
-    note:"Standing preferred, chopping motion with the hand, up and down.",
-    holdStages:[ { sec:3, label:"Chop up" }, { sec:3, label:"Chop down" } ],
-    restSec:2, reps:20 },
-  { id:11, name:"Towel squeeze", cat:"Strengthening", equip:"towel",
-    note:"Squeeze a rolled towel in the fist.",
-    holdSec:5, restSec:2, reps:30 },
-  { id:12, name:"Towel pull", cat:"Strengthening", equip:"towel",
-    note:"Pulling a towel with the hand, one set per direction. A longer rest kicks in when switching direction.",
-    holdSec:3, restSec:2, phaseGapSec:5,
-    phases:[
-      { label:"Pulling outward", reps:24 },
-      { label:"Pulling inward", reps:24 },
-    ]},
-  { id:13, name:"Ulnar nerve glide", cat:"Nerve", equip:"none",
-    note:"Like tossing a Q-tip away. Start with the hand pinched at the thumb and pointer finger as close to the ear as possible, hold, then sweep it out and away to the side, as if flicking a Q-tip off to the side, and hold there too.",
-    holdStages:[ { sec:5, label:"Near ear" }, { sec:3, label:"Away from ear" } ],
-    restSec:3, reps:10 },
-];
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkfryb1yoQ8Vl1tfjiYb4sjODfCnDyEpJSng6-YUNtPXNP0EAyo2n76Dw8NN098rkN/exec';
 
-// ---- Orientation lock ----
-// Works when installed to the home screen (see manifest.json) or when
-// the browser happens to allow it outside fullscreen. Fails silently
-// otherwise; the CSS landscape blocker below covers that case.
-async function tryLockPortrait(){
-  try{
-    if(screen.orientation && screen.orientation.lock){
-      await screen.orientation.lock("portrait");
+  let currentSplint = 'flexion';
+  let entriesCache = { flexion: [], extension: [] };
+
+  function switchTab(splint) {
+    currentSplint = splint;
+    document.getElementById('tabFlexionBtn').classList.toggle('active', splint === 'flexion');
+    document.getElementById('tabExtensionBtn').classList.toggle('active', splint === 'extension');
+    document.getElementById('logTitle').textContent = (splint === 'flexion' ? 'Flexion' : 'Extension') + ' Log';
+    document.getElementById('mainSubtitle').textContent = 'Daily wear log for elbow ' + splint;
+    document.getElementById('goalHint').textContent = (splint === 'flexion')
+      ? 'Goal: 2 hours per day'
+      : 'Goal: 4+ hours per day, ideally overnight if tolerated';
+    populateTensionSelect();
+    buildSchedule();
+    renderLog();
+    loadEntries(splint);
+  }
+
+  function getCurrentWeekGoal(splint) {
+    const startDate = new Date(2026, 7, 13);
+    const flexionBase = 4;
+    const extensionBase = 2;
+    const weeks = 13;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let w = 0; w < weeks; w++) {
+      const weekStart = new Date(startDate);
+      weekStart.setDate(startDate.getDate() + w * 7);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      if (today >= weekStart && today <= weekEnd) {
+        return (splint === 'flexion') ? (flexionBase + w) : (extensionBase + w);
+      }
     }
-  }catch(e){ /* not supported in this context, landscape blocker handles it */ }
-}
-tryLockPortrait();
-window.addEventListener("load", tryLockPortrait);
+    return null;
+  }
 
-// ---- Screen wake lock ----
-let wakeLock = null;
-async function requestWakeLock(){
-  try{
-    if("wakeLock" in navigator){
-      wakeLock = await navigator.wakeLock.request("screen");
-      wakeLock.addEventListener("release", ()=>{ wakeLock = null; });
+  function populateTensionSelect() {
+    const goal = getCurrentWeekGoal(currentSplint);
+    const select = document.getElementById('fTension');
+    let html = '<option value="">Select</option>';
+    for (let i = 1; i <= 20; i++) {
+      const isGoal = (i === goal);
+      html += '<option value="' + i + '"' + (isGoal ? ' selected' : '') + '>' +
+        i + (isGoal ? ' (this week\'s goal)' : '') +
+        '</option>';
     }
-  }catch(e){ /* wake lock unavailable or denied, the always-on video fallback below still covers it */ }
-}
-function releaseWakeLock(){
-  if(wakeLock){ wakeLock.release().catch(()=>{}); wakeLock = null; }
-}
+    select.innerHTML = html;
+  }
 
-// Always-on fallback: an invisible looping video keeps the screen awake
-// on every screen of the app, not just during an active exercise. This
-// covers contexts (like some installed standalone apps) where the
-// official Wake Lock API is flaky or unavailable.
-let noSleepVideo = null;
-function enableNoSleepFallback(){
-  if(noSleepVideo) return;
-  try{
-    const canvas = document.createElement("canvas");
-    canvas.width = 1; canvas.height = 1;
-    const ctx = canvas.getContext("2d");
-    ctx.fillRect(0,0,1,1);
-    const stream = canvas.captureStream(1);
-    const video = document.createElement("video");
-    video.muted = true;
-    video.setAttribute("muted","");
-    video.setAttribute("playsinline","");
-    video.setAttribute("webkit-playsinline","");
-    video.loop = true;
-    video.style.position = "fixed";
-    video.style.width = "1px";
-    video.style.height = "1px";
-    video.style.opacity = "0";
-    video.style.pointerEvents = "none";
-    video.srcObject = stream;
-    document.body.appendChild(video);
-    video.play().catch(()=>{});
-    noSleepVideo = video;
-  }catch(e){ /* canvas capture unsupported, nothing more we can do here */ }
-}
-// Start it immediately on load, and keep re-confirming it whenever the
-// page becomes visible again, so it stays running for the life of the tab.
-enableNoSleepFallback();
-document.addEventListener("visibilitychange", ()=>{
-  if(document.visibilityState === "visible"){
-    enableNoSleepFallback();
-    if(noSleepVideo && noSleepVideo.paused) noSleepVideo.play().catch(()=>{});
-    if(document.getElementById("screen-run").classList.contains("active")){
-      requestWakeLock();
+  function toggleOvernight() {
+    const overnight = document.getElementById('fOvernight').checked;
+    const hoursSelect = document.getElementById('fHours');
+    const minutesSelect = document.getElementById('fMinutes');
+    hoursSelect.disabled = overnight;
+    minutesSelect.disabled = overnight;
+    if (overnight) {
+      hoursSelect.value = '0';
+      minutesSelect.value = '0';
     }
   }
-});
 
-let current = null;   // exercise config with live field values
-let session = null;   // runtime state
-let soundOn = true;
-let rafId = null;
-
-// ---- Completed tracking ----
-let completedMap = {};
-
-// The PT "day" rolls over at 3am rather than midnight, so late-night
-// sessions before 3am still count toward the previous day.
-function getPTDayKey(date){
-  const d = new Date(date);
-  if(d.getHours() < 3) d.setDate(d.getDate() - 1);
-  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-}
-
-function loadCompleted(){
-  try{
-    const raw = localStorage.getItem("pt-timer-completed");
-    completedMap = raw ? JSON.parse(raw) : {};
-  }catch(e){ completedMap = {}; }
-  checkDailyReset();
-}
-function saveCompleted(){
-  try{ localStorage.setItem("pt-timer-completed", JSON.stringify(completedMap)); }
-  catch(e){ /* storage unavailable, state just stays in memory for this session */ }
-}
-function checkDailyReset(){
-  const todayKey = getPTDayKey(new Date());
-  let storedKey = null;
-  try{ storedKey = localStorage.getItem("pt-timer-daykey"); }catch(e){ /* ignore */ }
-  if(storedKey !== todayKey){
-    completedMap = {};
-    try{ localStorage.setItem("pt-timer-daykey", todayKey); }catch(e){ /* ignore */ }
-    saveCompleted();
+  function toggleDiscomfortNotes() {
+    const val = document.getElementById('fDiscomfort').value;
+    document.getElementById('discomfortNotesWrap').style.display = (val === 'Yes') ? 'block' : 'none';
   }
-}
-function markComplete(id){
-  completedMap[id] = true;
-  saveCompleted();
-  renderList();
-}
-function unmarkComplete(id){
-  delete completedMap[id];
-  saveCompleted();
-  renderList();
-}
-function resetAllCompleted(){
-  if(!confirm("Clear all checkmarks for today?")) return;
-  completedMap = {};
-  saveCompleted();
-  renderList();
-}
-loadCompleted();
-// Catch a 3am rollover even if the page is left open overnight
-setInterval(()=>{ checkDailyReset(); renderList(); }, 60000);
-document.addEventListener("visibilitychange", ()=>{
-  if(document.visibilityState === "visible"){ checkDailyReset(); renderList(); }
-});
 
+  function loadEntries(splint) {
+    document.getElementById('logTableWrap').innerHTML = '<div class="empty-state">Loading...</div>';
+    fetch(SCRIPT_URL + '?action=list&splint=' + splint)
+      .then(r => r.json())
+      .then(data => {
+        entriesCache[splint] = data.entries || [];
+        if (currentSplint === splint) renderLog();
+      })
+      .catch(() => {
+        document.getElementById('logTableWrap').innerHTML = '<div class="empty-state">Could not load entries. Check the connection.</div>';
+      });
+  }
 
-// ---- List screen ----
-function specLine(ex){
-  if(ex.type==="hold") return `${ex.holdSegments.length} holds &times; ${Math.round(ex.holdSegments[0]/60)} min, ${ex.holdBreakSec}s break between`;
-  if(ex.holdStages) return `${ex.reps} reps, ${ex.holdStages.map(s=>s.sec+"s").join(" + ")} hold, ${ex.restSec}s rest`;
-  if(ex.phases) return `${ex.phases.length} directions &times; ${ex.phases[0].reps} reps, ${ex.holdSec}s hold`;
-  return `${ex.reps} reps, ${ex.holdSec}s hold, ${ex.restSec}s rest`;
-}
-function equipLabel(equip){
-  if(equip==="weight") return { text:"Weight", cls:"equip-weight" };
-  if(equip==="band") return { text:"Band", cls:"equip-band" };
-  if(equip==="towel") return { text:"Towel", cls:"equip-towel" };
-  return { text:"No equipment", cls:"equip-none" };
-}
-function renderList(){
-  const grid = document.getElementById("exercise-grid");
-  grid.innerHTML = "";
-  EXERCISES.forEach(ex=>{
-    const card = document.createElement("div");
-    card.className = "card" + (completedMap[ex.id] ? " completed" : "");
-    card.onclick = ()=>openSetup(ex.id);
-    const equip = equipLabel(ex.equip);
-    card.innerHTML = `
-      <div class="check-badge">&check;</div>
-      <div class="idx">EX ${String(ex.id).padStart(2,"0")}</div>
-      <h3>${ex.name}</h3>
-      <span class="cat">${ex.cat}</span>
-      <span class="equip ${equip.cls}">${equip.text}</span>
-      <div class="spec">${specLine(ex)}</div>
-    `;
-    grid.appendChild(card);
+  function renderLog() {
+    const entries = entriesCache[currentSplint] || [];
+    const wrap = document.getElementById('logTableWrap');
+    if (entries.length === 0) {
+      wrap.innerHTML = '<div class="empty-state">No entries logged yet.</div>';
+      return;
+    }
+    const sorted = entries.slice().sort((a, b) => (a.date + a.session).localeCompare(b.date + b.session));
+
+    let html = '<div class="table-scroll"><table><thead><tr><th>Date</th><th>Duration</th><th>Tension</th><th>Discomfort</th><th>Pain</th><th>Comments</th><th class="del-col"></th></tr></thead><tbody>';
+
+    let currentDate = null;
+    let dailyTotal = 0;
+    for (let i = 0; i < sorted.length; i++) {
+      const e = sorted[i];
+      if (currentDate !== null && e.date !== currentDate) {
+        html += dailyTotalRow(currentDate, dailyTotal);
+        dailyTotal = 0;
+      }
+      currentDate = e.date;
+      dailyTotal += parseFloat(e.duration) || 0;
+
+      const discClass = e.discomfort === 'Yes' ? 'badge-yes' : 'badge-no';
+      html += '<tr>' +
+        '<td>' + escapeHtml(e.date) + '</td>' +
+        '<td>' + escapeHtml(e.duration) + (e.duration === 'Overnight' ? '' : ' min') + '</td>' +
+        '<td>' + escapeHtml(e.tension) + '</td>' +
+        '<td class="' + discClass + '">' + escapeHtml(e.discomfort) + (e.discomfortNotes ? ' - ' + escapeHtml(e.discomfortNotes) : '') + '</td>' +
+        '<td>' + escapeHtml(e.painLevel) + '</td>' +
+        '<td>' + escapeHtml(e.comments) + '</td>' +
+        '<td class="del-col"><button class="del-btn" onclick="deleteEntry(' + e.rowIndex + ')">delete</button></td>' +
+        '</tr>';
+    }
+    if (currentDate !== null) {
+      html += dailyTotalRow(currentDate, dailyTotal);
+    }
+
+    html += '</tbody></table></div>';
+    wrap.innerHTML = html;
+  }
+
+  function dailyTotalRow(date, total) {
+    return '<tr class="daily-total-row"><td><strong>' + escapeHtml(date) + ' total</strong></td>' +
+      '<td><strong>' + total + ' min</strong></td>' +
+      '<td colspan="5"></td></tr>';
+  }
+
+  function deleteEntry(rowIndex) {
+    if (!confirm('Delete this entry?')) return;
+    fetch(SCRIPT_URL + '?action=delete&splint=' + currentSplint + '&rowIndex=' + rowIndex)
+      .then(r => r.json())
+      .then(() => loadEntries(currentSplint));
+  }
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  document.getElementById('entryForm').addEventListener('submit', function(evt) {
+    evt.preventDefault();
+    const submitBtn = document.getElementById('submitBtn');
+    const statusMsg = document.getElementById('statusMsg');
+    submitBtn.disabled = true;
+    statusMsg.textContent = '';
+    statusMsg.className = 'status-msg';
+
+    const params = new URLSearchParams({
+      action: 'add',
+      splint: currentSplint,
+      date: document.getElementById('fDate').value,
+      duration: document.getElementById('fOvernight').checked
+        ? 'Overnight'
+        : String(parseInt(document.getElementById('fHours').value, 10) * 60 + parseInt(document.getElementById('fMinutes').value, 10)),
+      tension: document.getElementById('fTension').value,
+      discomfort: document.getElementById('fDiscomfort').value,
+      discomfortNotes: document.getElementById('fDiscomfortNotes').value,
+      painLevel: document.getElementById('fPainLevel').value,
+      comments: document.getElementById('fComments').value
+    });
+
+    fetch(SCRIPT_URL + '?' + params.toString())
+      .then(r => r.json())
+      .then(data => {
+        submitBtn.disabled = false;
+        if (data.status === 'ok') {
+          statusMsg.textContent = 'Session logged.';
+          statusMsg.className = 'status-msg ok';
+          document.getElementById('entryForm').reset();
+          document.getElementById('fDate').valueAsDate = new Date();
+          toggleDiscomfortNotes();
+          toggleOvernight();
+          populateTensionSelect();
+          loadEntries(currentSplint);
+        } else {
+          statusMsg.textContent = 'Something went wrong. Try again.';
+          statusMsg.className = 'status-msg err';
+        }
+      })
+      .catch(() => {
+        submitBtn.disabled = false;
+        statusMsg.textContent = 'Could not reach the tracker. Check the connection.';
+        statusMsg.className = 'status-msg err';
+      });
   });
-}
-renderList();
 
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-function goToList(){
-  stopLoop();
-  if(breakState){
-    if(breakState.rafId) cancelAnimationFrame(breakState.rafId);
-    breakState = null;
-  }
-  releaseWakeLock();
-  showScreen("screen-list");
-  window.scrollTo({top:0, behavior:"smooth"});
-}
+  function buildSchedule() {
+    const startDate = new Date(2026, 7, 13); // Aug 13, 2026
+    const flexionBase = 4;
+    const extensionBase = 2;
+    const weeks = 13;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-// ---- Setup screen ----
-function openSetup(id){
-  const ex = EXERCISES.find(e=>e.id===id);
-  current = JSON.parse(JSON.stringify(ex)); // working copy
-  document.getElementById("setup-cat").textContent = ex.cat;
-  document.getElementById("setup-name").textContent = ex.name;
-  document.getElementById("setup-note").textContent = ex.note;
+    document.getElementById('scheduleTensionHeader').textContent =
+      (currentSplint === 'flexion') ? 'Flexion' : 'Extension';
 
-  const fields = document.getElementById("setup-fields");
-  const phaselist = document.getElementById("setup-phaselist");
-  fields.innerHTML = "";
-  phaselist.innerHTML = "";
+    const body = document.getElementById('scheduleBody');
+    let html = '';
 
-  if(ex.type==="hold"){
-    fields.innerHTML = `
-      <div class="field"><label>Hold length (minutes)</label>
-        <input type="number" inputmode="decimal" min="0.5" step="0.5" id="f-hold-min" value="${(ex.holdSegments[0]/60)}"></div>
-      <div class="field"><label>Number of holds</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="1" id="f-hold-count" value="${ex.holdSegments.length}"></div>
-      <div class="field"><label>Break between (seconds)</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" id="f-hold-break" value="${ex.holdBreakSec}"></div>`;
-  } else if(ex.holdStages){
-    fields.innerHTML = `
-      <div class="field"><label>Reps</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="1" id="f-reps" value="${ex.reps}"></div>
-      <div class="field"><label>${ex.holdStages[0].label} hold (s)</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="1" id="f-hold-stage-0" value="${ex.holdStages[0].sec}"></div>
-      <div class="field"><label>${ex.holdStages[1].label} hold (s)</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="1" id="f-hold-stage-1" value="${ex.holdStages[1].sec}"></div>
-      <div class="field"><label>Rest (seconds)</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" id="f-rest" value="${ex.restSec}"></div>`;
-  } else if(ex.phases){
-    fields.innerHTML = `
-      <div class="field"><label>Hold (seconds)</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="1" id="f-hold" value="${ex.holdSec}"></div>
-      <div class="field"><label>Rest between reps (s)</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="1" id="f-rest" value="${ex.restSec}"></div>
-      <div class="field"><label>Reps per direction</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="1" id="f-repsperphase" value="${ex.phases[0].reps}"></div>
-      ${ex.phaseGapSec ? `<div class="field"><label>Direction rest (s)</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="1" id="f-phasegap" value="${ex.phaseGapSec}"></div>` : ""}`;
-    phaselist.innerHTML = ex.phases.map(p=>`<div>${p.label}: ${p.reps} reps</div>`).join("");
-  } else {
-    fields.innerHTML = `
-      <div class="field"><label>Reps</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="1" id="f-reps" value="${ex.reps}"></div>
-      <div class="field"><label>Hold (seconds)</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="1" id="f-hold" value="${ex.holdSec}"></div>
-      <div class="field"><label>Rest (seconds)</label>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" id="f-rest" value="${ex.restSec}"></div>`;
-  }
-  updateMarkBtn();
-  showScreen("screen-setup");
-}
+    for (let w = 0; w < weeks; w++) {
+      const weekStart = new Date(startDate);
+      weekStart.setDate(startDate.getDate() + w * 7);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
 
-function updateMarkBtn(){
-  const btn = document.getElementById("setup-mark-btn");
-  if(!current) return;
-  const isDone = !!completedMap[current.id];
-  btn.textContent = isDone ? "Completed today ✓ (tap to undo)" : "Mark as completed";
-  btn.classList.toggle("is-complete", isDone);
-}
+      const isCurrent = today >= weekStart && today <= weekEnd;
+      const rowClass = isCurrent ? ' class="current-week-row"' : '';
+      const tension = (currentSplint === 'flexion') ? (flexionBase + w) : (extensionBase + w);
 
-function toggleMarkComplete(){
-  if(!current) return;
-  if(completedMap[current.id]){
-    unmarkComplete(current.id);
-  } else {
-    markComplete(current.id);
-    if(allExercisesComplete()){
-      showAllDone();
-      return;
+      html += '<tr' + rowClass + '>' +
+        '<td>' + (w + 1) + '</td>' +
+        '<td>' + formatShortDate(weekStart) + ' - ' + formatShortDate(weekEnd, weekStart) + '</td>' +
+        '<td>' + tension + '</td>' +
+        '</tr>';
     }
+    body.innerHTML = html;
   }
-  updateMarkBtn();
-}
 
-function readSetupFields(){
-  if(current.type==="hold"){
-    const mins = parseFloat(document.getElementById("f-hold-min").value);
-    const count = parseInt(document.getElementById("f-hold-count").value);
-    const brk = parseInt(document.getElementById("f-hold-break").value);
-    const perHold = mins ? Math.round(mins*60) : current.holdSegments[0];
-    const numHolds = count || current.holdSegments.length;
-    current.holdSegments = Array(numHolds).fill(perHold);
-    current.holdBreakSec = (brk || brk === 0) ? brk : current.holdBreakSec;
-  } else if(current.holdStages){
-    current.reps = parseInt(document.getElementById("f-reps").value)||current.reps;
-    const s0 = parseInt(document.getElementById("f-hold-stage-0").value)||current.holdStages[0].sec;
-    const s1 = parseInt(document.getElementById("f-hold-stage-1").value)||current.holdStages[1].sec;
-    current.holdStages = [
-      { sec:s0, label:current.holdStages[0].label },
-      { sec:s1, label:current.holdStages[1].label },
-    ];
-    current.restSec = parseInt(document.getElementById("f-rest").value)||current.restSec;
-  } else if(current.phases){
-    const hold = parseInt(document.getElementById("f-hold").value)||current.holdSec;
-    const rest = parseInt(document.getElementById("f-rest").value)||current.restSec;
-    const rpp = parseInt(document.getElementById("f-repsperphase").value)||current.phases[0].reps;
-    current.holdSec = hold;
-    current.restSec = rest;
-    current.phases = current.phases.map(p=>({label:p.label, reps:rpp}));
-    const gapEl = document.getElementById("f-phasegap");
-    if(gapEl) current.phaseGapSec = parseInt(gapEl.value)||current.phaseGapSec;
-  } else {
-    current.reps = parseInt(document.getElementById("f-reps").value)||current.reps;
-    current.holdSec = parseInt(document.getElementById("f-hold").value)||current.holdSec;
-    current.restSec = parseInt(document.getElementById("f-rest").value)||current.restSec;
-  }
-}
-
-// ---- Run screen / session state machine ----
-function buildPhaseQueue(ex){
-  // returns array of {label, reps}
-  if(ex.phases) return ex.phases;
-  return [{ label:null, reps: ex.reps }];
-}
-
-function startExercise(){
-  readSetupFields();
-  showScreen("screen-run");
-  requestWakeLock();
-  document.getElementById("run-name").textContent = current.name;
-  runPreCountdown(3, ()=>{ beginSession(); });
-}
-
-let preferredVoice = null;
-function pickPreferredVoice(){
-  if(!("speechSynthesis" in window)) return;
-  const voices = window.speechSynthesis.getVoices();
-  if(!voices || !voices.length) return;
-  // Prefer a local (on-device) English voice over a network-streamed one,
-  // since local voices tend to sound cleaner and avoid streaming artifacts.
-  preferredVoice =
-    voices.find(v => v.localService && v.lang && v.lang.startsWith("en")) ||
-    voices.find(v => v.localService) ||
-    voices.find(v => v.lang && v.lang.startsWith("en")) ||
-    voices[0];
-}
-if("speechSynthesis" in window){
-  pickPreferredVoice();
-  window.speechSynthesis.addEventListener("voiceschanged", pickPreferredVoice);
-}
-
-function speak(text){
-  if(!soundOn) return;
-  if(!("speechSynthesis" in window)) return;
-  setTimeout(()=>{
-    try{
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = 1;
-      u.pitch = 1;
-      u.volume = 0.6;
-      if(preferredVoice) u.voice = preferredVoice;
-      window.speechSynthesis.speak(u);
-    }catch(e){ /* speech synthesis unavailable, the beep still plays */ }
-  }, 90);
-}
-
-function runPreCountdown(n, onDone){
-  const dial = document.getElementById("run-dial");
-  const num = document.getElementById("run-num");
-  const stateWord = document.getElementById("run-state");
-  const phaseLabel = document.getElementById("run-phase-label");
-  const repCounter = document.getElementById("run-rep");
-  document.getElementById("run-dashes").innerHTML = "";
-  document.getElementById("btn-toggle").style.display = "none";
-
-  dial.classList.remove("mode-press","mode-rest","mode-done");
-  dial.classList.add("mode-press");
-  stateWord.textContent = "Get ready";
-  stateWord.className = "state-word press";
-  phaseLabel.textContent = "";
-  repCounter.textContent = "";
-
-  let count = n;
-  num.textContent = count;
-  beep(500, 0.12, 0, "triangle");
-  const iv = setInterval(()=>{
-    count--;
-    if(count > 0){
-      num.textContent = count;
-      beep(500, 0.12, 0, "triangle");
-    } else {
-      clearInterval(iv);
-      num.textContent = "Go";
-      beep(880, 0.2, 0, "square");
-      setTimeout(onDone, 500);
+  function formatShortDate(d, refDate) {
+    const str = (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+    if (refDate && refDate.getFullYear() === d.getFullYear()) {
+      return (d.getMonth() + 1) + '/' + d.getDate();
     }
-  }, 800);
-}
-
-function beginSession(){
-  if(breakState){
-    if(breakState.rafId) cancelAnimationFrame(breakState.rafId);
-    breakState = null;
-  }
-  document.getElementById("great-job").style.display = "none";
-  document.getElementById("confetti").innerHTML = "";
-  document.getElementById("switch-banner").style.display = "none";
-  document.getElementById("switch-title").textContent = "Switch directions";
-  document.getElementById("break-banner").style.display = "none";
-  document.getElementById("run-dial").style.display = "flex";
-  document.getElementById("run-dashes").style.display = "flex";
-  document.getElementById("run-rep").style.display = "block";
-  document.getElementById("btn-toggle").style.display = "inline-block";
-  document.getElementById("btn-toggle").classList.remove("is-paused");
-  document.getElementById("btn-reset").style.display = "inline-block";
-  document.getElementById("btn-break").style.display = "inline-block";
-  document.getElementById("btn-next").style.display = "none";
-  const phases = buildPhaseQueue(current);
-  const totalReps = phases.reduce((a,p)=>a+p.reps,0);
-  session = {
-    ex: current,
-    phases,
-    phaseIdx: 0,
-    repInPhase: 0,
-    totalRepsDone: 0,
-    totalReps,
-    holdIdx: 0,
-    stageIdx: 0,
-    lastSpokenSec: 0,
-    mode: current.type==="hold" ? "hold" : "press",
-    timeLeft: current.type==="hold" ? current.holdSegments[0] : (current.holdStages ? current.holdStages[0].sec : current.holdSec),
-    paused: false,
-    lastTick: null,
-    finished: false,
-  };
-  document.getElementById("btn-toggle").textContent = "Pause";
-  renderDashes();
-  playCue("start");
-  startLoop();
-}
-
-function resetExercise(){
-  stopLoop();
-  startExercise();
-}
-
-function allExercisesComplete(){
-  return EXERCISES.every(e=>completedMap[e.id]);
-}
-
-function showAllDone(){
-  showScreen("screen-alldone");
-  window.scrollTo({top:0, behavior:"smooth"});
-  const wrap = document.getElementById("alldone-confetti");
-  wrap.innerHTML = "";
-  const bits = ["✦","●","▲","■","✦","●"];
-  const colors = ["#ef8354","#4fd1c5","#7fd88f","#c58cff"];
-  for(let i=0;i<26;i++){
-    const s = document.createElement("span");
-    s.textContent = bits[i % bits.length];
-    s.style.left = (Math.random()*100) + "%";
-    s.style.color = colors[i % colors.length];
-    s.style.animationDelay = (Math.random()*0.5) + "s";
-    s.style.fontSize = (14 + Math.random()*10) + "px";
-    wrap.appendChild(s);
-  }
-  playCue("done");
-}
-
-function goToNextExercise(){
-  stopLoop();
-  releaseWakeLock();
-  const idx = EXERCISES.findIndex(e=>e.id===current.id);
-  let next = null;
-  for(let i=1;i<=EXERCISES.length;i++){
-    const candidate = EXERCISES[(idx+i) % EXERCISES.length];
-    if(!completedMap[candidate.id]){ next = candidate; break; }
-  }
-  if(!next){
-    showAllDone();
-    return;
-  }
-  openSetup(next.id);
-  window.scrollTo({top:0, behavior:"smooth"});
-}
-
-function renderDashes(){
-  const wrap = document.getElementById("run-dashes");
-  if(current.type==="hold"){ wrap.innerHTML=""; return; }
-  wrap.innerHTML = "";
-  const phase = session.phases[session.phaseIdx];
-  for(let i=0;i<phase.reps;i++){
-    const d = document.createElement("div");
-    d.className = "dash" + (i < session.repInPhase ? " filled" : "");
-    wrap.appendChild(d);
-  }
-}
-
-function currentPhaseLabel(){
-  const p = session.phases[session.phaseIdx];
-  return p.label;
-}
-
-function startLoop(){
-  session.lastTick = performance.now();
-  rafId = requestAnimationFrame(tick);
-}
-function stopLoop(){
-  if(rafId) cancelAnimationFrame(rafId);
-  rafId = null;
-}
-
-// ---- Take a break ----
-let breakState = null; // {timeLeft, rafId, wasPaused}
-function startBreak(){
-  if(!session || session.finished || breakState) return;
-  breakState = { timeLeft: 60, rafId: null, wasPaused: session.paused };
-  session.paused = true;
-  stopLoop();
-  document.getElementById("run-dial").style.display = "none";
-  document.getElementById("switch-banner").style.display = "none";
-  document.getElementById("run-dashes").style.display = "none";
-  document.getElementById("run-rep").style.display = "none";
-  document.getElementById("btn-toggle").style.display = "none";
-  document.getElementById("btn-reset").style.display = "none";
-  document.getElementById("btn-break").style.display = "none";
-  document.getElementById("break-banner").style.display = "block";
-  document.getElementById("break-count").textContent = "60";
-  playCue("break");
-  breakState.lastTick = performance.now();
-  breakState.rafId = requestAnimationFrame(breakTick);
-}
-function breakTick(now){
-  if(!breakState) return;
-  const dt = (now - breakState.lastTick)/1000;
-  breakState.lastTick = now;
-  breakState.timeLeft -= dt;
-  if(breakState.timeLeft <= 0){
-    endBreak();
-  } else {
-    document.getElementById("break-count").textContent = Math.ceil(breakState.timeLeft);
-    breakState.rafId = requestAnimationFrame(breakTick);
-  }
-}
-function skipBreak(){
-  endBreak();
-}
-function endBreak(){
-  if(!breakState) return;
-  if(breakState.rafId) cancelAnimationFrame(breakState.rafId);
-  const resumePlaying = !breakState.wasPaused;
-  breakState = null;
-  document.getElementById("break-banner").style.display = "none";
-  document.getElementById("run-dial").style.display = "flex";
-  document.getElementById("run-dashes").style.display = "flex";
-  document.getElementById("run-rep").style.display = "block";
-  document.getElementById("btn-toggle").style.display = "inline-block";
-  document.getElementById("btn-reset").style.display = "inline-block";
-  document.getElementById("btn-break").style.display = "inline-block";
-  playCue("resume");
-  if(session && !session.finished){
-    session.paused = !resumePlaying;
-    document.getElementById("btn-toggle").textContent = session.paused ? "Resume" : "Pause";
-    document.getElementById("btn-toggle").classList.toggle("is-paused", session.paused);
-    render();
-    if(resumePlaying){
-      session.lastTick = performance.now();
-      rafId = requestAnimationFrame(tick);
-    }
-  }
-}
-
-function togglePause(){
-  if(!session || session.finished) return;
-  session.paused = !session.paused;
-  const btn = document.getElementById("btn-toggle");
-  btn.textContent = session.paused ? "Resume" : "Pause";
-  btn.classList.toggle("is-paused", session.paused);
-  if(!session.paused){
-    playCue("resume");
-    session.lastTick = performance.now();
-    rafId = requestAnimationFrame(tick);
-  } else {
-    playCue("pause");
-    stopLoop();
-  }
-}
-
-function tick(now){
-  if(!session || session.paused || session.finished) return;
-  const dt = (now - session.lastTick)/1000;
-  session.lastTick = now;
-  session.timeLeft -= dt;
-
-  if(session.timeLeft <= 0){
-    advanceState();
-  } else {
-    if(current.voiceCountdown && (session.mode==="press" || session.mode==="rest" || session.mode==="hold")){
-      const secsLeft = Math.ceil(session.timeLeft);
-      if(secsLeft !== session.lastSpokenSec){
-        session.lastSpokenSec = secsLeft;
-        if(secsLeft >= 1 && secsLeft <= 3) speak(String(secsLeft));
-      }
-    }
-    render();
-    rafId = requestAnimationFrame(tick);
-  }
-}
-
-function advanceState(){
-  if(current.type==="hold"){
-    if(session.mode === "hold"){
-      session.holdIdx++;
-      if(session.holdIdx >= current.holdSegments.length){
-        session.finished = true;
-        session.mode = "done";
-        render();
-        playCue("done");
-        return;
-      }
-      session.mode = "holdbreak";
-      session.timeLeft = current.holdBreakSec;
-      playCue("switchdir");
-    } else {
-      session.mode = "hold";
-      session.timeLeft = current.holdSegments[session.holdIdx];
-      playCue("press");
-    }
-    render();
-    rafId = requestAnimationFrame(tick);
-    return;
+    return str;
   }
 
-  if(session.mode === "press"){
-    // multi-stage hold (e.g. hold near, sweep, hold away): advance the
-    // stage within this rep before counting the rep as complete
-    if(current.holdStages && session.stageIdx < current.holdStages.length - 1){
-      session.stageIdx++;
-      session.timeLeft = current.holdStages[session.stageIdx].sec;
-      playCue("press");
-      render();
-      rafId = requestAnimationFrame(tick);
-      return;
-    }
-    // completed a hold, count the rep
-    session.repInPhase++;
-    session.totalRepsDone++;
-    renderDashes();
+  buildSchedule();
+  populateTensionSelect();
+  document.getElementById('fDate').valueAsDate = new Date();
+  loadEntries('flexion');
+  loadEntries('extension');
 
-    const phase = session.phases[session.phaseIdx];
-    const isLastRepOverall = session.totalRepsDone >= session.totalReps;
-
-    if(isLastRepOverall){
-      session.finished = true;
-      session.mode = "done";
-      render();
-      playCue("done");
-      return;
-    }
-    // move to rest
-    session.mode = "rest";
-    const phaseNow = session.phases[session.phaseIdx];
-    const isPhaseBoundary = session.repInPhase >= phaseNow.reps && session.phaseIdx < session.phases.length - 1;
-    session.timeLeft = (isPhaseBoundary && current.phaseGapSec) ? current.phaseGapSec : current.restSec;
-    session.isPhaseGapRest = isPhaseBoundary && !!current.phaseGapSec;
-    playCue(session.isPhaseGapRest ? "switchdir" : "rest");
-  } else {
-    // rest finished, check if phase is done -> move to next phase
-    const phase = session.phases[session.phaseIdx];
-    if(session.repInPhase >= phase.reps){
-      session.phaseIdx++;
-      session.repInPhase = 0;
-      renderDashes();
-    }
-    session.mode = "press";
-    session.stageIdx = 0;
-    session.timeLeft = current.holdStages ? current.holdStages[0].sec : current.holdSec;
-    playCue("press");
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js').catch(function() {});
+    });
   }
-  render();
-  rafId = requestAnimationFrame(tick);
-}
-
-function formatTime(totalSeconds){
-  const s = Math.max(0, Math.ceil(totalSeconds));
-  const m = Math.floor(s/60);
-  const rem = s%60;
-  return m + ":" + String(rem).padStart(2,"0");
-}
-
-function render(){
-  const dial = document.getElementById("run-dial");
-  const num = document.getElementById("run-num");
-  const stateWord = document.getElementById("run-state");
-  const phaseLabel = document.getElementById("run-phase-label");
-  const repCounter = document.getElementById("run-rep");
-
-  dial.classList.remove("mode-press","mode-rest","mode-done");
-
-  if(session.finished){
-    dial.classList.add("mode-done");
-    num.textContent = "Done";
-    document.getElementById("run-dial").querySelector(".unit").textContent = "";
-    stateWord.textContent = "Complete";
-    stateWord.className = "state-word done";
-    phaseLabel.textContent = current.name;
-    if(current.type==="hold"){
-      repCounter.textContent = "";
-    } else {
-      repCounter.innerHTML = `<span>${session.totalRepsDone} / ${session.totalReps} reps</span>`;
-    }
-    document.getElementById("btn-toggle").style.display = "none";
-    document.getElementById("btn-reset").style.display = "none";
-    document.getElementById("btn-break").style.display = "none";
-    document.getElementById("btn-next").style.display = "inline-block";
-    if(!session.celebrated){
-      session.celebrated = true;
-      document.getElementById("great-job").style.display = "block";
-      fireConfetti();
-      markComplete(current.id);
-      window.scrollTo({top:0, behavior:"smooth"});
-    }
-    return;
-  }
-  document.getElementById("btn-toggle").style.display = "inline-block";
-
-  const secs = Math.max(0, Math.ceil(session.timeLeft));
-
-  if(current.type==="hold"){
-    const dialEl = document.getElementById("run-dial");
-    const banner = document.getElementById("switch-banner");
-    if(session.mode === "holdbreak"){
-      dialEl.style.display = "none";
-      banner.style.display = "block";
-      document.getElementById("switch-title").textContent = "Readjust";
-      document.getElementById("switch-next").textContent = "Reposition the weight, then the next hold begins.";
-      document.getElementById("switch-count").textContent = secs;
-      stateWord.textContent = "";
-      phaseLabel.textContent = "";
-      repCounter.textContent = "";
-      return;
-    }
-    dialEl.style.display = "flex";
-    banner.style.display = "none";
-    num.textContent = formatTime(session.timeLeft);
-    dial.classList.add("mode-press");
-    stateWord.textContent = "Hold";
-    stateWord.className = "state-word press";
-    phaseLabel.textContent = current.holdSegments.length > 1
-      ? `Hold ${session.holdIdx+1} of ${current.holdSegments.length}`
-      : "Single sustained hold";
-    repCounter.textContent = "";
-    document.getElementById("run-dial").querySelector(".unit").textContent = "min:sec";
-    return;
-  }
-  num.textContent = secs;
-  document.getElementById("run-dial").querySelector(".unit").textContent = "sec";
-
-  const label = currentPhaseLabel();
-  const phaseIdx = session.phaseIdx;
-  const phaseCount = session.phases.length;
-  if(current.holdStages && session.mode === "press"){
-    phaseLabel.textContent = current.holdStages[session.stageIdx].label;
-  } else {
-    phaseLabel.textContent = label
-      ? (phaseCount > 1 ? `Direction ${phaseIdx+1} of ${phaseCount}: ${label}` : `Direction: ${label}`)
-      : "";
-  }
-
-  const dialEl = document.getElementById("run-dial");
-  const banner = document.getElementById("switch-banner");
-
-  if(session.mode === "rest" && session.isPhaseGapRest){
-    dialEl.style.display = "none";
-    banner.style.display = "block";
-    stateWord.textContent = "";
-    const nextPhase = session.phases[session.phaseIdx + 1];
-    document.getElementById("switch-next").textContent = nextPhase ? `Next: ${nextPhase.label}` : "";
-    document.getElementById("switch-count").textContent = secs;
-    repCounter.textContent = "";
-    document.getElementById("run-dashes").innerHTML = "";
-    return;
-  }
-  dialEl.style.display = "flex";
-  banner.style.display = "none";
-
-  if(session.mode === "press"){
-    dial.classList.add("mode-press");
-    stateWord.textContent = "Press & hold";
-    stateWord.className = "state-word press";
-  } else {
-    dial.classList.add("mode-rest");
-    stateWord.textContent = "Release & rest";
-    stateWord.className = "state-word rest";
-  }
-  const phaseNow = session.phases[session.phaseIdx];
-  const repShown = Math.min(session.repInPhase+1, phaseNow.reps);
-  repCounter.innerHTML = `Rep <span>${repShown}</span> of <span>${phaseNow.reps}</span>`;
-}
-
-// ---- Sound cues ----
-let audioCtx = null;
-function beep(freq, dur, delay, type, gain){
-  setTimeout(()=>{
-    try{
-      if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.connect(g); g.connect(audioCtx.destination);
-      o.type = type || "sine";
-      o.frequency.value = freq;
-      g.gain.value = gain || 0.09;
-      o.start();
-      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-      o.stop(audioCtx.currentTime + dur + 0.02);
-    }catch(e){/* audio not available, ignore */}
-  }, delay);
-}
-function fireConfetti(){
-  const wrap = document.getElementById("confetti");
-  const bits = ["✦","●","▲","■","✦","●"];
-  const colors = ["#ef8354","#4fd1c5","#7fd88f","#eef1f3"];
-  for(let i=0;i<18;i++){
-    const s = document.createElement("span");
-    s.textContent = bits[i % bits.length];
-    s.style.left = (Math.random()*100) + "%";
-    s.style.color = colors[i % colors.length];
-    s.style.animationDelay = (Math.random()*0.4) + "s";
-    s.style.fontSize = (12 + Math.random()*10) + "px";
-    wrap.appendChild(s);
-  }
-  setTimeout(()=>{ wrap.innerHTML = ""; }, 2200);
-}
-
-// start: a two-tone "ding-dong" bell, unique from press/rest/done
-// press: one short blip, like "go"
-// rest: two soft low beeps, like "ease off"
-// switchdir: alternating high-low alarm-like blips, unique from everything else
-// done: a short celebratory ditty
-function playCue(type){
-  if(!soundOn) return;
-  if(type==="start"){ beep(392, 0.22, 0, "sine"); beep(523, 0.34, 240, "sine"); }
-  if(type==="press"){ beep(740, 0.1, 0, "square"); }
-  if(type==="rest"){ beep(330, 0.22, 0, "triangle", 0.16); beep(330, 0.22, 200, "triangle", 0.16); }
-  if(type==="switchdir"){
-    beep(950, 0.09, 0, "sawtooth");
-    beep(500, 0.09, 130, "sawtooth");
-    beep(950, 0.09, 260, "sawtooth");
-    beep(500, 0.14, 390, "sawtooth");
-  }
-  if(type==="pause"){ beep(520, 0.14, 0, "sine"); beep(340, 0.2, 110, "sine"); }
-  if(type==="resume"){ beep(340, 0.12, 0, "sine"); beep(520, 0.2, 100, "sine"); }
-  if(type==="break"){ beep(440, 0.2, 0, "sine"); beep(330, 0.28, 200, "sine"); }
-  if(type==="done"){
-    beep(523, 0.14, 0, "triangle");
-    beep(659, 0.14, 130, "triangle");
-    beep(784, 0.14, 260, "triangle");
-    beep(1046, 0.32, 420, "triangle");
-    beep(880, 0.32, 420, "triangle");
-  }
-}
-function toggleSound(){
-  soundOn = !soundOn;
-  const el = document.getElementById("sound-toggle");
-  el.textContent = "sound: " + (soundOn?"on":"off");
-  el.classList.toggle("on", soundOn);
-  el.classList.toggle("off", !soundOn);
-}
 </script>
+
 </body>
 </html>
